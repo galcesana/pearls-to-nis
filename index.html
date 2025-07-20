@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pearls ➜ NIS Converter</title>
+  <meta name="description" content="Convert Tomorrowland Pearls to Israeli Shekels (NIS) instantly." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #181c22;
+      --card-accent: #1f252d;
+      --text: #f5f7fa;
+      --text-dim: #a0adba;
+      --primary: #4d8dff;
+      --primary-glow: 180 100% 60%;
+      --radius: 22px;
+      --focus: 0 0 0 3px rgba(77, 141, 255,0.35);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+      background: radial-gradient(circle at 30% 20%, #1c2330, #0d0f12 70%); 
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+    header {
+      padding: clamp(1.25rem, 3vh, 2.25rem) clamp(1rem, 4vw, 3rem) 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+    header h1 {
+      font-size: clamp(1.35rem, 1.6rem + 0.8vw, 2.4rem);
+      margin: 0;
+      line-height: 1.15;
+      letter-spacing: .5px;
+      background: linear-gradient(90deg,#4d8dff,#7fb4ff 50%,#c2dcff);
+      -webkit-background-clip: text;
+      color: transparent;
+      font-weight: 700;
+    }
+    .wrapper {
+      width: min(960px, 100%);
+      margin: 0 auto;
+      padding: clamp(1rem, 2vh, 2.5rem) clamp(1rem, 5vw, 3rem) 4rem;
+      display: grid;
+      gap: 2.25rem;
+    }
+
+    .card {
+      background: linear-gradient(145deg, var(--card) 0%, var(--card-accent) 100%);
+      border: 1px solid #222b35;
+      padding: clamp(1.5rem, 2vw, 2.25rem) clamp(1.25rem, 2.5vw, 2.75rem);
+      border-radius: var(--radius);
+      position: relative;
+      box-shadow: 0 10px 35px -12px rgba(0,0,0,0.55), 0 2px 4px -1px rgba(0,0,0,.5), 0 0 0 1px #1d242c;
+      backdrop-filter: blur(6px) saturate(140%);
+      overflow: hidden;
+    }
+    .card:before {
+      content: "";
+      position: absolute; inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 85% 10%, rgba(109,160,255,0.18), transparent 60%),
+                  radial-gradient(circle at 15% 90%, rgba(77,141,255,0.15), transparent 65%);
+    }
+    .card h2 { margin: 0 0 1.25rem; font-weight: 600; font-size: clamp(1.05rem, .9rem + .6vw, 1.55rem); }
+
+    form {
+      display: grid;
+      gap: 1.25rem;
+    }
+    .grid-two {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    label span { display: inline-block; margin-bottom: .45rem; font-size: .85rem; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; color: var(--text-dim); }
+
+    input[type=number], input[type=text] {
+      width: 100%;
+      padding: .9rem 1rem;
+      font: inherit;
+      background: #10151b;
+      color: var(--text);
+      border: 1px solid #28323d;
+      border-radius: 14px;
+      outline: none;
+      transition: border-color .25s, box-shadow .25s, background .25s;
+    }
+    input[type=number]:focus, input[type=text]:focus {
+      border-color: var(--primary);
+      box-shadow: var(--focus);
+    }
+    .rate-editable { display: flex; align-items: center; gap: .75rem; }
+    .rate-editable button.inline-edit {
+      background: none; border: 1px solid #2f3a46; color: var(--text-dim); font: inherit; padding: .4rem .75rem; border-radius: 8px; cursor: pointer; font-size: .7rem; letter-spacing: .5px; text-transform: uppercase; transition: .25s; }
+    .rate-editable button.inline-edit:hover { color: var(--text); border-color: var(--primary); }
+
+    button.convert {
+      border: none;
+      background: linear-gradient(135deg,#4d8dff,#2269e8 60%);
+      color: #fff;
+      padding: 1rem 1.4rem;
+      font: 600 1rem/1 "Inter", sans-serif;
+      border-radius: 16px;
+      letter-spacing: .5px;
+      cursor: pointer;
+      position: relative;
+      transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .3s;
+      box-shadow: 0 8px 24px -6px rgba(77,141,255,0.45), 0 2px 5px -1px rgba(0,0,0,.6);
+    }
+    button.convert:hover { transform: translateY(-3px); }
+    button.convert:active { transform: translateY(0); }
+
+    .output-card { display: grid; gap: .65rem; }
+    .result-value {
+      font-size: clamp(2rem,1.6rem + 2vw,3rem);
+      font-weight: 700;
+      line-height: 1.05;
+      background: linear-gradient(90deg,#fff,#c8ddff 45%,#8ab5ff);
+      -webkit-background-clip: text; color: transparent;
+      word-break: break-word;
+    }
+    .result-sub { font-size: .9rem; color: var(--text-dim); }
+
+    .meta { font-size: .7rem; letter-spacing: .5px; text-transform: uppercase; color: var(--text-dim); display:flex; gap:1.4rem; flex-wrap:wrap; }
+    .meta div { display:flex; align-items:center; gap:.4rem; }
+    .badge { padding:.35rem .55rem; background:#223042; border:1px solid #2f3d4b; border-radius: 7px; font-size:.65rem; font-weight:500; letter-spacing:.5px; display:inline-flex; gap:.4rem; align-items:center; }
+
+    footer { text-align:center; padding: 2.5rem 1rem 3rem; font-size: .75rem; color: var(--text-dim); }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    @media (min-width: 820px) {
+      .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Pearl → NIS Converter</h1>
+  </header>
+
+  <main class="wrapper">
+    <section class="layout">
+      <!-- Input / Controls -->
+      <div class="card" aria-labelledby="converterTitle">
+        <h2 id="converterTitle">Convert Pearls</h2>
+        <form id="convertForm" autocomplete="off">
+          <label>
+            <span>Number of Pearls</span>
+            <input type="number" id="pearlsInput" min="0" step="0.01" placeholder="e.g. 25" inputmode="decimal" required />
+          </label>
+
+          <div class="grid-two">
+            <label>
+              <span>Pearl → € Rate</span>
+              <div class="rate-editable">
+                <input type="number" id="pearlEuro" step="0.0001" min="0" value="1.82" aria-describedby="pearlEuroHelp" />
+                <button type="button" class="inline-edit" data-reset="1.82" aria-label="Reset Pearl to Euro rate">Reset</button>
+              </div>
+            </label>
+            <label>
+              <span>€ → ₪ Rate</span>
+              <div class="rate-editable">
+                <input type="number" id="euroNis" step="0.0001" min="0" value="3.91" aria-describedby="euroNisHelp" />
+                <button type="button" class="inline-edit" data-reset="3.91" aria-label="Reset Euro to Shekel rate">Reset</button>
+              </div>
+            </label>
+          </div>
+
+          <button class="convert" type="submit">Convert</button>
+        </form>
+      </div>
+
+      <!-- Output -->
+      <div class="card output-card" aria-live="polite" aria-atomic="true">
+        <h2>Result</h2>
+        <div class="result-value" id="resultDisplay">₪0.00</div>
+        <div class="result-sub" id="formulaDisplay">Enter an amount to convert.</div>
+        <div class="meta" id="metaInfo">
+          <div><span class="badge">Pearl→€ <strong id="ratePE">1.82</strong></span></div>
+          <div><span class="badge">€→₪ <strong id="rateEN">3.91</strong></span></div>
+          <div><span class="badge">Pearl→₪ <strong id="ratePN">7.1162</strong></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="infoTitle">
+      <h2 id="infoTitle">About</h2>
+      <p>This simple, mobile‑friendly tool converts Tomorrowland <strong>Pearls</strong> into Israeli Shekels (₪) using the configurable rates above. Official festival pricing can change; always verify on‑site before making spending decisions.</p>
+      <p><strong>How it works:</strong> <code>Pearls × (Pearl→€ rate) × (Euro→₪ rate)</code>. You can adjust the rates if live currency values or festival Pearl pricing shift, then press <em>Convert</em> again.</p>
+      <p style="font-size:.8rem; color:var(--text-dim);">Disclaimer: Provided as-is without warranty. Not affiliated with Tomorrowland.</p>
+    </section>
+  </main>
+
+  <footer>
+    <div style="display:flex; flex-direction:column; gap:.4rem; align-items:center;">
+      <div>Built for quick on-site budgeting · © <span id="year"></span></div>
+      <div style="font-size:.75rem; color:var(--text-dim); display:flex; flex-wrap:wrap; gap:.6rem; justify-content:center;">
+        <span>Created by <strong style="color:#fff; font-weight:600;">Gal Cesana</strong></span>
+        <span><a href="https://www.linkedin.com/in/gal-cesana-844509217/" target="_blank" rel="noopener" style="color:var(--primary);">LinkedIn</a></span>
+        <span><a href="mailto:galcesana8@gmail.com" style="color:var(--primary);">galcesana8@gmail.com</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      const pearlsInput = document.getElementById('pearlsInput');
+      const pearlEuro = document.getElementById('pearlEuro');
+      const euroNis = document.getElementById('euroNis');
+      const resultDisplay = document.getElementById('resultDisplay');
+      const formulaDisplay = document.getElementById('formulaDisplay');
+      const ratePE = document.getElementById('ratePE');
+      const rateEN = document.getElementById('rateEN');
+      const ratePN = document.getElementById('ratePN');
+      const form = document.getElementById('convertForm');
+      const yearEl = document.getElementById('year');
+      yearEl.textContent = new Date().getFullYear();
+
+      // Convert whenever any input changes (instant feedback)
+      [pearlsInput, pearlEuro, euroNis].forEach(el => el.addEventListener('input', convert));
+      form.addEventListener('submit', e => { e.preventDefault(); convert(); pearlsInput.focus(); pearlsInput.select(); });
+
+      document.querySelectorAll('.inline-edit').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.previousElementSibling;
+            if(target) { target.value = btn.dataset.reset; convert(); target.focus(); }
+        });
+      });
+
+      function toNumber(v){ return parseFloat(v.replace(/,/g,'')); }
+      function formatCurrency(val){
+        return '₪' + val.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+      }
+      function convert(){
+        const pearls = toNumber(pearlsInput.value || '0');
+        const rPE = toNumber(pearlEuro.value || '0');
+        const rEN = toNumber(euroNis.value || '0');
+        if(rPE <= 0 || rEN <= 0){ return; }
+        const nisRate = rPE * rEN;
+        const nis = pearls * nisRate;
+        resultDisplay.textContent = formatCurrency(isFinite(nis) ? nis : 0);
+        formulaDisplay.textContent = pearls > 0
+          ? `${pearls} × ${rPE} × ${rEN} = ${nis.toFixed(2)} NIS`
+          : 'Enter an amount to convert.';
+        ratePE.textContent = rPE; rateEN.textContent = rEN; ratePN.textContent = nisRate.toFixed(4);
+        // subtle animation pulse
+        resultDisplay.animate([
+          {transform:'scale(1.0)', filter:'brightness(1)'},
+          {transform:'scale(1.03)', filter:'brightness(1.25)'},
+          {transform:'scale(1.0)', filter:'brightness(1)'}
+        ], {duration: 450, easing:'cubic-bezier(.22,1,.36,1)'});
+      }
+      convert();
+
+      // Installable PWA-like meta (optional enhancement placeholder)
+      // Could add a manifest if desired.
+    })();
+  </script>
+</body>
+</html>
