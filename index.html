@@ -142,6 +142,25 @@
     @media (min-width: 820px) {
       .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
     }
+      /* --- Dish list & votes --- */
+    .dishes-section h2 {margin-top:0;}
+    .dish-form {display:grid; gap:1rem; margin-bottom:1.5rem;}
+    .dish-form-inline {display:grid; gap:.9rem; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));}
+    .dish-form button {justify-self:start;}
+    .dishes-table {width:100%; border-collapse:separate; border-spacing:0 8px;}
+    .dishes-table th {text-align:left; font-size:.7rem; letter-spacing:.6px; text-transform:uppercase; color:var(--text-dim); font-weight:600; padding:0 .75rem .4rem;}
+    .dishes-table td {background:#141a20; border:1px solid #1f262d; padding:.75rem .9rem; font-size:.85rem; vertical-align:middle;}
+    .dishes-table tr td:first-child {border-top-left-radius:12px; border-bottom-left-radius:12px;}
+    .dishes-table tr td:last-child {border-top-right-radius:12px; border-bottom-right-radius:12px;}
+    .vote-btns {display:flex; gap:.4rem;}
+    .vote-btns button {background:#1c2630; border:1px solid #2a3642; color:var(--text-dim); padding:.45rem .6rem; font-size:.65rem; border-radius:8px; cursor:pointer; letter-spacing:.5px; text-transform:uppercase; transition:.25s;}
+    .vote-btns button:hover {color:var(--text); border-color:var(--primary);}
+    .score {font-weight:600;}
+    .empty-note {font-size:.75rem; color:var(--text-dim); margin-top:.5rem;}
+    .inline-badge {background:#223042; border:1px solid #2f3d4b; padding:.3rem .5rem; border-radius:6px; font-size:.6rem; letter-spacing:.5px; margin-left:.5rem;}
+    .filter-bar {display:flex; gap:.75rem; flex-wrap:wrap; align-items:center; margin:0 0 1rem;}
+    .filter-bar select {background:#10151b; color:var(--text); border:1px solid #28323d; padding:.55rem .7rem; border-radius:10px;}
+    .notice {font-size:.65rem; color:var(--text-dim); line-height:1.4; margin-top:.8rem;}
   </style>
 </head>
 <body>
@@ -200,6 +219,56 @@
       <p><strong>How it works:</strong> <code>Pearls × (Pearl→€ rate) × (Euro→₪ rate)</code>. You can adjust the rates if live currency values or festival Pearl pricing shift, then press <em>Convert</em> again.</p>
       <p style="font-size:.8rem; color:var(--text-dim);">Disclaimer: Provided as-is without warranty. Not affiliated with Tomorrowland.</p>
     </section>
+      <section class="card dishes-section" aria-labelledby="dishesTitle">
+      <h2 id="dishesTitle">Community Dish Prices <span class="inline-badge" title="Experimental">BETA</span></h2>
+      <p style="margin-top:-.25rem; font-size:.85rem; color:var(--text-dim);">Add dishes you purchased (name + Pearls cost). Others can up‑vote if the price is accurate (or down‑vote if not). Sorted by score so the most reliable info floats to the top.</p>
+      <form id="dishForm" class="dish-form" autocomplete="off">
+        <div class="dish-form-inline">
+          <label>
+            <span style="display:inline-block;margin-bottom:.35rem;font-size:.7rem;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);">Dish Name</span>
+            <input type="text" id="dishName" placeholder="e.g. Truffle Burger" required maxlength="64" />
+          </label>
+          <label>
+            <span style="display:inline-block;margin-bottom:.35rem;font-size:.7rem;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);">Pearls</span>
+            <input type="number" id="dishPearls" min="0" step="0.01" placeholder="e.g. 14" required />
+          </label>
+          <label>
+            <span style="display:inline-block;margin-bottom:.35rem;font-size:.7rem;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);">Computed ₪</span>
+            <input type="text" id="dishNis" readonly tabindex="-1" />
+          </label>
+        </div>
+        <button type="submit" class="convert" style="font-size:.85rem;padding:.8rem 1.1rem;">Add Dish</button>
+      </form>
+
+      <div class="filter-bar">
+        <label style="font-size:.65rem;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);display:flex;flex-direction:column;gap:.3rem;">
+          Sort By
+          <select id="sortSelect">
+            <option value="score">Score (Desc)</option>
+            <option value="pearls">Pearls (Asc)</option>
+            <option value="pearlsDesc">Pearls (Desc)</option>
+            <option value="name">Name (A→Z)</option>
+          </select>
+        </label>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table class="dishes-table" aria-describedby="dishesTitle">
+          <thead>
+            <tr>
+              <th style="min-width:160px;">Dish</th>
+              <th>Pearls</th>
+              <th>NIS</th>
+              <th>Score</th>
+              <th>Vote</th>
+            </tr>
+          </thead>
+          <tbody id="dishesBody"></tbody>
+        </table>
+      </div>
+      <div id="emptyState" class="empty-note">No dishes yet. Be the first to add one.</div>
+      <p class="notice">This is a *client-side demo* only. For real multi-user sharing you must connect a backend (e.g. Firebase / Supabase). Currently dishes persist only in *this browser* using <code>localStorage</code>. Clearing site data wipes them.</p>
+    </section>
   </main>
 
   <footer>
@@ -213,59 +282,203 @@
     </div>
   </footer>
 
-  <script>
-    (function() {
-      const pearlsInput = document.getElementById('pearlsInput');
-      const pearlEuro = document.getElementById('pearlEuro');
-      const euroNis = document.getElementById('euroNis');
-      const resultDisplay = document.getElementById('resultDisplay');
-      const formulaDisplay = document.getElementById('formulaDisplay');
-      const ratePE = document.getElementById('ratePE');
-      const rateEN = document.getElementById('rateEN');
-      const ratePN = document.getElementById('ratePN');
-      const form = document.getElementById('convertForm');
-      const yearEl = document.getElementById('year');
-      yearEl.textContent = new Date().getFullYear();
+<script type="module">
+  // ========= Base Converter Logic =========
+  const pearlsInput = document.getElementById('pearlsInput');
+  const pearlEuro = document.getElementById('pearlEuro');
+  const euroNis = document.getElementById('euroNis');
+  const resultDisplay = document.getElementById('resultDisplay');
+  const formulaDisplay = document.getElementById('formulaDisplay');
+  const ratePE = document.getElementById('ratePE');
+  const rateEN = document.getElementById('rateEN');
+  const ratePN = document.getElementById('ratePN');
+  const form = document.getElementById('convertForm');
+  const yearEl = document.getElementById('year');
+  yearEl.textContent = new Date().getFullYear();
 
-      // Convert whenever any input changes (instant feedback)
-      [pearlsInput, pearlEuro, euroNis].forEach(el => el.addEventListener('input', convert));
-      form.addEventListener('submit', e => { e.preventDefault(); convert(); pearlsInput.focus(); pearlsInput.select(); });
+  [pearlsInput, pearlEuro, euroNis].forEach(el => el.addEventListener('input', convert));
+  form.addEventListener('submit', e => { e.preventDefault(); convert(); pearlsInput.focus(); pearlsInput.select(); });
+  document.querySelectorAll('.inline-edit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.previousElementSibling;
+      if(target) { target.value = btn.dataset.reset; convert(); target.focus(); }
+    });
+  });
+  function toNumber(v){ return parseFloat(v.replace(/,/g,'')); }
+  function formatCurrency(val){
+    return '₪' + val.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  function convert(){
+    const pearls = toNumber(pearlsInput.value || '0');
+    const rPE = toNumber(pearlEuro.value || '0');
+    const rEN = toNumber(euroNis.value || '0');
+    if(rPE <= 0 || rEN <= 0){ return; }
+    const nisRate = rPE * rEN;
+    const nis = pearls * nisRate;
+    resultDisplay.textContent = formatCurrency(isFinite(nis) ? nis : 0);
+    formulaDisplay.textContent = pearls > 0
+      ? `${pearls} × ${rPE} × ${rEN} = ${nis.toFixed(2)} NIS`
+      : 'Enter an amount to convert.';
+    ratePE.textContent = rPE; rateEN.textContent = rEN; ratePN.textContent = nisRate.toFixed(4);
+    resultDisplay.animate([
+      {transform:'scale(1.0)', filter:'brightness(1)'},
+      {transform:'scale(1.03)', filter:'brightness(1.25)'},
+      {transform:'scale(1.0)', filter:'brightness(1)'}
+    ], {duration: 450, easing:'cubic-bezier(.22,1,.36,1)'});
+  }
+  convert();
 
-      document.querySelectorAll('.inline-edit').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const target = btn.previousElementSibling;
-            if(target) { target.value = btn.dataset.reset; convert(); target.focus(); }
-        });
+  // ========= Firebase Real-Time Dishes & Voting =========
+  // (Anonymous auth + Firestore. One vote per user per dish.)
+
+  // Firebase SDK imports (v10+ modular)
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+  import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, orderBy, doc, runTransaction, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+  import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+  const firebaseConfig = {
+    apiKey: 'AIzaSyDb3uBk2DyoRdgdMmmZy0i19xrNnEgrk1g',
+    authDomain: 'pearls-to-nis.firebaseapp.com',
+    projectId: 'pearls-to-nis',
+    storageBucket: 'pearls-to-nis.firebasestorage.app',
+    messagingSenderId: '100254293722',
+    appId: '1:100254293722:web:291c00ce13bc2d1963cfe3',
+    measurementId: 'G-ZDZ5HS24J1'
+  };
+  const fbApp = initializeApp(firebaseConfig);
+  const db = getFirestore(fbApp);
+  const auth = getAuth(fbApp);
+
+  // DOM references for dishes
+  const dishForm = document.getElementById('dishForm');
+  const dishName = document.getElementById('dishName');
+  const dishPearls = document.getElementById('dishPearls');
+  const dishNis = document.getElementById('dishNis');
+  const dishesBody = document.getElementById('dishesBody');
+  const emptyState = document.getElementById('emptyState');
+  const sortSelect = document.getElementById('sortSelect');
+
+  let currentUser = null;
+  let dishesCache = []; // local mirror for sorting modes
+
+  // Auth: anonymous sign-in
+  signInAnonymously(auth).catch(console.error);
+  onAuthStateChanged(auth, user => {
+    currentUser = user;
+    if(user) initDishesListener();
+  });
+
+  // Listen to dishes collection (ordered by votes desc for starter view)
+  let unsubscribe = null;
+  function initDishesListener(){
+    if(unsubscribe) unsubscribe();
+    const q = query(collection(db,'dishes'), orderBy('votes','desc'), orderBy('pearls','asc'));
+    unsubscribe = onSnapshot(q, snap => {
+      dishesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderDishes();
+    });
+  }
+
+  // Add dish
+  dishForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    if(!currentUser) return;
+    const name = dishName.value.trim();
+    const pearls = parseFloat(dishPearls.value||'0');
+    if(!name || !(pearls>0)) return;
+    try {
+      await addDoc(collection(db,'dishes'), {
+        name,
+        pearls,
+        votes: 0,
+        created: serverTimestamp(),
+        createdBy: currentUser.uid
       });
+      dishName.value=''; dishPearls.value=''; dishNis.value='';
+      dishName.focus();
+    } catch(err){ console.error(err); }
+  });
 
-      function toNumber(v){ return parseFloat(v.replace(/,/g,'')); }
-      function formatCurrency(val){
-        return '₪' + val.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
-      }
-      function convert(){
-        const pearls = toNumber(pearlsInput.value || '0');
-        const rPE = toNumber(pearlEuro.value || '0');
-        const rEN = toNumber(euroNis.value || '0');
-        if(rPE <= 0 || rEN <= 0){ return; }
-        const nisRate = rPE * rEN;
-        const nis = pearls * nisRate;
-        resultDisplay.textContent = formatCurrency(isFinite(nis) ? nis : 0);
-        formulaDisplay.textContent = pearls > 0
-          ? `${pearls} × ${rPE} × ${rEN} = ${nis.toFixed(2)} NIS`
-          : 'Enter an amount to convert.';
-        ratePE.textContent = rPE; rateEN.textContent = rEN; ratePN.textContent = nisRate.toFixed(4);
-        // subtle animation pulse
-        resultDisplay.animate([
-          {transform:'scale(1.0)', filter:'brightness(1)'},
-          {transform:'scale(1.03)', filter:'brightness(1.25)'},
-          {transform:'scale(1.0)', filter:'brightness(1)'}
-        ], {duration: 450, easing:'cubic-bezier(.22,1,.36,1)'});
-      }
-      convert();
+  // Compute NIS for dish form
+  function computeDishNis(){
+    const pearls = parseFloat(dishPearls.value||'0');
+    const nisRate = parseFloat(pearlEuro.value||'0') * parseFloat(euroNis.value||'0');
+    dishNis.value = (pearls>0 && nisRate>0) ? (pearls*nisRate).toFixed(2) : '';
+  }
+  dishPearls.addEventListener('input', computeDishNis);
+  pearlEuro.addEventListener('input', computeDishNis);
+  euroNis.addEventListener('input', computeDishNis);
 
-      // Installable PWA-like meta (optional enhancement placeholder)
-      // Could add a manifest if desired.
-    })();
-  </script>
+  // Voting transaction: ensures single vote per user stored in dishVotes/<dishId>_<uid>
+  async function vote(dishId, delta){
+    if(!currentUser) return;
+    const dishRef = doc(db,'dishes', dishId);
+    const voteRef = doc(db,'dishVotes', `${dishId}_${currentUser.uid}`);
+    try {
+      await runTransaction(db, async (tx) => {
+        const dishSnap = await tx.get(dishRef);
+        if(!dishSnap.exists()) return;
+        const voteSnap = await tx.get(voteRef);
+        const currentVotes = dishSnap.data().votes || 0;
+        if(voteSnap.exists()) {
+          const prev = voteSnap.data().value;
+            if(prev === delta) { return; } // same vote: ignore
+            // switch vote
+            tx.update(dishRef, { votes: currentVotes - prev + delta });
+            tx.update(voteRef, { value: delta, updated: serverTimestamp() });
+        } else {
+          tx.update(dishRef, { votes: currentVotes + delta });
+          tx.set(voteRef, { value: delta, created: serverTimestamp(), dishId, uid: currentUser.uid });
+        }
+      });
+    } catch(err){ console.error('Vote failed', err); }
+  }
+
+  // Sort modes (client only on cached snapshot)
+  function sortDishes(list){
+    const mode = sortSelect.value;
+    const arr = [...list];
+    switch(mode){
+      case 'pearls': arr.sort((a,b)=>a.pearls-b.pearls || b.votes-a.votes); break;
+      case 'pearlsDesc': arr.sort((a,b)=>b.pearls-a.pearls || b.votes-a.votes); break;
+      case 'name': arr.sort((a,b)=>(a.name||'').localeCompare(b.name||'')); break;
+      default: arr.sort((a,b)=>b.votes-a.votes || a.pearls-b.pearls); // score
+    }
+    return arr;
+  }
+  sortSelect.addEventListener('change', renderDishes);
+  [pearlEuro, euroNis].forEach(el=>el.addEventListener('input', renderDishes));
+
+  function renderDishes(){
+    dishesBody.innerHTML='';
+    const list = sortDishes(dishesCache);
+    if(list.length===0){ emptyState.style.display='block'; return; }
+    emptyState.style.display='none';
+    const nisRate = parseFloat(pearlEuro.value||'0') * parseFloat(euroNis.value||'0');
+    for(const d of list){
+      const tr = document.createElement('tr');
+      // ✨ FIX: Provide fallbacks for potentially missing data to prevent errors
+      const name = d.name || 'N/A';
+      const pearls = d.pearls || 0;
+      const votes = d.votes ?? 0;
+      const nis = (nisRate > 0 && pearls > 0) ? (pearls * nisRate).toFixed(2) : '—';
+      
+      tr.innerHTML = `<td>${escapeHtml(name)}</td>
+        <td>${pearls}</td>
+        <td>₪${nis}</td>
+        <td class="score">${votes}</td>
+        <td><div class="vote-btns"><button type="button" aria-label="Upvote" data-up="${d.id}">▲</button><button type="button" aria-label="Downvote" data-down="${d.id}">▼</button></div></td>`;
+      dishesBody.appendChild(tr);
+    }
+  }
+  function escapeHtml(str){ return str.replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+  dishesBody.addEventListener('click', e => {
+    const up = e.target.getAttribute('data-up');
+    const down = e.target.getAttribute('data-down');
+    if(up) vote(up, 1); else if(down) vote(down, -1);
+  });
+
+  // ========= End Firebase section =========
+</script>
 </body>
 </html>
