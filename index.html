@@ -165,110 +165,121 @@
 </head>
 <body>
   <header>
-    <h1>Pearl → NIS Converter</h1>
-  </header>
+  <h1 style="display:flex;align-items:center;gap:1rem;">
+    <img src="images/TML symbol.png" alt="Tomorrowland Symbol" style="height:2.2em;width:auto;object-fit:contain;display:inline-block;vertical-align:middle;" />
+    Festive Finance
+  </h1>
+</header>
 
   <main class="wrapper">
-    <section class="layout">
-      <!-- Input / Controls -->
-      <div class="card" aria-labelledby="converterTitle">
-        <h2 id="converterTitle">Convert Pearls</h2>
-        <form id="convertForm" autocomplete="off">
+  <section class="layout">
+    <!-- Input / Controls -->
+    <div class="card" aria-labelledby="converterTitle">
+      <h2 id="converterTitle">Pearl → NIS Converter</h2>
+      <form id="convertForm" autocomplete="off">
+        <label>
+          <span>Number of Pearls</span>
+          <input type="number" id="pearlsInput" min="0" step="0.01" placeholder="e.g. 25" inputmode="decimal" required />
+        </label>
+
+        <div class="grid-two">
           <label>
-            <span>Number of Pearls</span>
-            <input type="number" id="pearlsInput" min="0" step="0.01" placeholder="e.g. 25" inputmode="decimal" required />
-          </label>
-
-          <div class="grid-two">
-            <label>
-              <span>Pearl → € Rate</span>
-              <div class="rate-editable">
-                <input type="number" id="pearlEuro" step="0.0001" min="0" value="1.82" aria-describedby="pearlEuroHelp" />
-                <button type="button" class="inline-edit" data-reset="1.82" aria-label="Reset Pearl to Euro rate">Reset</button>
-              </div>
-            </label>
-            <label>
-              <span>€ → ₪ Rate</span>
-              <div class="rate-editable">
-                <input type="number" id="euroNis" step="0.0001" min="0" value="3.91" aria-describedby="euroNisHelp" />
-                <button type="button" class="inline-edit" data-reset="3.91" aria-label="Reset Euro to Shekel rate">Reset</button>
-              </div>
-            </label>
-          </div>
-
-          <button class="convert" type="submit">Convert</button>
-        </form>
-      </div>
-
-      <!-- Output -->
-      <div class="card output-card" aria-live="polite" aria-atomic="true">
-        <h2>Result</h2>
-        <div class="result-value" id="resultDisplay">₪0.00</div>
-        <div class="result-sub" id="formulaDisplay">Enter an amount to convert.</div>
-        <div class="meta" id="metaInfo">
-          <div><span class="badge">Pearl→€ <strong id="ratePE">1.82</strong></span></div>
-          <div><span class="badge">€→₪ <strong id="rateEN">3.91</strong></span></div>
-          <div><span class="badge">Pearl→₪ <strong id="ratePN">7.1162</strong></span></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="card" aria-labelledby="infoTitle">
-      <h2 id="infoTitle">About</h2>
-      <p>This simple, mobile‑friendly tool converts Tomorrowland <strong>Pearls</strong> into Israeli Shekels (₪) using the configurable rates above. Official festival pricing can change; always verify on‑site before making spending decisions.</p>
-      <p><strong>How it works:</strong> <code>Pearls × (Pearl→€ rate) × (Euro→₪ rate)</code>. You can adjust the rates if live currency values or festival Pearl pricing shift, then press <em>Convert</em> again.</p>
-      <p style="font-size:.8rem; color:var(--text-dim);">Disclaimer: Provided as-is without warranty. Not affiliated with Tomorrowland.</p>
-    </section>
-      <section class="card dishes-section" aria-labelledby="dishesTitle">
-      <h2 id="dishesTitle">Community Dish Prices <span class="inline-badge" title="Experimental">BETA</span></h2>
-      <p style="margin-top:-.25rem; font-size:.85rem; color:var(--text-dim);">Add dishes you purchased (name + Pearls cost). Others can up‑vote if the price is accurate (or down‑vote if not). Sorted by score so the most reliable info floats to the top.</p>
-      <form id="dishForm" class="dish-form" autocomplete="off">
-        <div class="dish-form-inline">
-          <label>
-            <span style="display:inline-block;margin-bottom:.35rem;font-size:.7rem;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);">Dish Name</span>
-            <input type="text" id="dishName" placeholder="e.g. Truffle Burger" required maxlength="64" />
+            <span>Pearl → € Rate</span>
+            <div class="rate-editable">
+              <input type="number" id="pearlEuro" step="0.0001" min="0" value="1.82" aria-describedby="pearlEuroHelp" />
+              <button type="button" class="inline-edit" data-reset="1.82" aria-label="Reset Pearl to Euro rate">Reset</button>
+            </div>
           </label>
           <label>
-            <span style="display:inline-block;margin-bottom:.35rem;font-size:.7rem;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);">Pearls</span>
-            <input type="number" id="dishPearls" min="0" step="0.01" placeholder="e.g. 14" required />
-          </label>
-          <label>
-            <span style="display:inline-block;margin-bottom:.35rem;font-size:.7rem;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);">Computed ₪</span>
-            <input type="text" id="dishNis" readonly tabindex="-1" />
+            <span>€ → ₪ Rate</span>
+            <div class="rate-editable">
+              <input type="number" id="euroNis" step="0.0001" min="0" value="3.91" aria-describedby="euroNisHelp" />
+              <button type="button" class="inline-edit" data-reset="3.91" aria-label="Reset Euro to Shekel rate">Reset</button>
+            </div>
           </label>
         </div>
-        <button type="submit" class="convert" style="font-size:.85rem;padding:.8rem 1.1rem;">Add Dish</button>
+
+        <button class="convert" type="submit">Convert</button>
       </form>
+    </div>
 
-      <div class="filter-bar">
-        <label style="font-size:.65rem;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);display:flex;flex-direction:column;gap:.3rem;">
-          Sort By
-          <select id="sortSelect">
-            <option value="score">Score (Desc)</option>
-            <option value="pearls">Pearls (Asc)</option>
-            <option value="pearlsDesc">Pearls (Desc)</option>
-            <option value="name">Name (A→Z)</option>
-          </select>
+    <!-- Output -->
+    <div class="card output-card" aria-live="polite" aria-atomic="true">
+      <h2>Result</h2>
+      <div class="result-value" id="resultDisplay">₪0.00</div>
+      <div class="result-sub" id="formulaDisplay">Enter an amount to convert.</div>
+      <div class="meta" id="metaInfo">
+        <div><span class="badge">Pearl→€ <strong id="ratePE">1.82</strong></span></div>
+        <div><span class="badge">€→₪ <strong id="rateEN">3.91</strong></span></div>
+        <div><span class="badge">Pearl→₪ <strong id="ratePN">7.1162</strong></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card dishes-section" aria-labelledby="dishesTitle">
+    <h2 id="dishesTitle">Community Dish Prices</h2>
+    <p style="margin-top:-.25rem; font-size:.85rem; color:var(--text-dim);">Add dishes you purchased (name + Pearls cost). Others can up‑vote if the price is accurate (or down‑vote if not). Sorted by score so the most reliable info floats to the top.</p>
+    <form id="dishForm" class="dish-form" autocomplete="off">
+      <div class="dish-form-inline">
+        <label>
+          <span style="display:inline-block;margin-bottom:.35rem;font-size:.7rem;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);">Dish Name</span>
+          <input type="text" id="dishName" placeholder="e.g. Truffle Burger" required maxlength="64" />
+        </label>
+        <label>
+          <span style="display:inline-block;margin-bottom:.35rem;font-size:.7rem;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);">Pearls</span>
+          <input type="number" id="dishPearls" min="0" step="0.01" placeholder="e.g. 14" required />
+        </label>
+        <label>
+          <span style="display:inline-block;margin-bottom:.35rem;font-size:.7rem;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);">Computed ₪</span>
+          <input type="text" id="dishNis" readonly tabindex="-1" />
         </label>
       </div>
+      <button type="submit" class="convert" style="font-size:.85rem;padding:.8rem 1.1rem;">Add Dish</button>
+    </form>
+    <div class="filter-bar">
+      <label style="font-size:.65rem;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);display:flex;flex-direction:column;gap:.3rem;">
+        Sort By
+        <select id="sortSelect">
+          <option value="score">Score (Desc)</option>
+          <option value="pearls">Pearls (Asc)</option>
+          <option value="pearlsDesc">Pearls (Desc)</option>
+          <option value="name">Name (A→Z)</option>
+        </select>
+      </label>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="dishes-table" aria-describedby="dishesTitle">
+        <thead>
+          <tr>
+            <th style="min-width:160px;">Dish</th>
+            <th>Pearls</th>
+            <th>NIS</th>
+            <th>Score</th>
+            <th>Vote</th>
+          </tr>
+        </thead>
+        <tbody id="dishesBody"></tbody>
+      </table>
+    </div>
+    <div id="emptyState" class="empty-note">No dishes yet. Be the first to add one.</div>
+  </section>
 
-      <div style="overflow-x:auto;">
-        <table class="dishes-table" aria-describedby="dishesTitle">
-          <thead>
-            <tr>
-              <th style="min-width:160px;">Dish</th>
-              <th>Pearls</th>
-              <th>NIS</th>
-              <th>Score</th>
-              <th>Vote</th>
-            </tr>
-          </thead>
-          <tbody id="dishesBody"></tbody>
-        </table>
-      </div>
-      <div id="emptyState" class="empty-note">No dishes yet. Be the first to add one.</div>
-    </section>
-  </main>
+  <section class="card" aria-labelledby="infoTitle">
+    <h2 id="infoTitle">About</h2>
+    <p>
+      This simple, mobile‑friendly tool converts Tomorrowland <strong>Pearls</strong> into Israeli Shekels (₪) using the configurable rates above. Official festival pricing can change; always verify on‑site before making spending decisions.
+    </p>
+    <p>
+      <strong>How it works:</strong> <code>Pearls × (Pearl→€ rate) × (Euro→₪ rate)</code>. You can adjust the rates if live currency values or festival Pearl pricing shift, then press <em>Convert</em> again.
+    </p>
+    <p>
+      <strong>Community Dish Prices:</strong> Share and discover real dish prices from festival-goers! Add dishes you purchased (name + Pearls cost), and the community can up-vote if the price is accurate or down-vote if not. The most reliable info floats to the top, helping everyone budget better.
+    </p>
+    <p style="font-size:.8rem; color:var(--text-dim);">
+      Disclaimer: Provided as-is without warranty. Not affiliated with Tomorrowland.
+    </p>
+  </section>
+</main>
 
   <footer>
     <div style="display:flex; flex-direction:column; gap:.4rem; align-items:center;">
