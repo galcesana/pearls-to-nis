@@ -411,6 +411,11 @@
 
   // Voting transaction: ensures single vote per user stored in dishVotes/<dishId>_<uid>
   async function vote(dishId, delta){
+    
+    // test
+    console.log("🏷️ VOTE CALLED:", { dishId, delta, uid: currentUser?.uid });
+    // end test
+
     if(!currentUser) return;
     const dishRef = doc(db,'dishes', dishId);
     const voteRef = doc(db,'dishVotes', `${dishId}_${currentUser.uid}`);
